@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#11100e">
+<title>居酒屋看板メーカー</title>
+<style>
+  :root { color-scheme: dark; --ink:#f6e8c8; --gold:#e6b95e; }
+  * { box-sizing:border-box; }
+  body {
+    margin:0; min-height:100vh; padding:28px 18px 40px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:26px;
+    color:#f5ead4; background:
+      radial-gradient(ellipse at 50% 35%, #393027 0, #1c1916 48%, #0c0c0b 100%);
+    font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  }
+  .heading { text-align:center; }
+  .heading h1 { margin:0 0 7px; font-size:clamp(22px,4vw,30px); letter-spacing:.16em; }
+  .heading p { margin:0; color:#b9aa91; font-size:13px; }
+  .scene { width:min(100%,760px); display:grid; place-items:center; padding:24px 12px 30px; }
+  .sign-wrap { position:relative; width:min(100%,590px); padding:22px 26px; }
+  .sign-wrap:before,.sign-wrap:after {
+    content:""; position:absolute; top:50%; width:38px; height:12px; transform:translateY(-50%);
+    background:linear-gradient(#d8b36a,#805326 45%,#e7c47b 55%,#6b421e);
+    box-shadow:0 3px 8px #0009;
+  }
+  .sign-wrap:before { left:0; } .sign-wrap:after { right:0; }
+  .sign {
+    position:relative; min-height:245px; padding:34px 28px;
+    display:grid; place-items:center; overflow:hidden;
+    border:9px solid #4b2b17; outline:2px solid #c89b51; outline-offset:-15px;
+    background:
+      repeating-linear-gradient(0deg,#6a321b 0,#6a321b 3px,#7b3c20 4px,#5a2b18 8px),
+      #71371d;
+    box-shadow:0 18px 35px #000b, inset 0 0 35px #1b0908a8;
+  }
+  .sign:before { content:""; position:absolute; inset:13px; border:1px solid #e0b96c99; pointer-events:none; }
+  .sign-text {
+    position:relative; z-index:1; max-width:100%; color:#ffe8a5; text-align:center;
+    font-family:"Yu Mincho","Hiragino Mincho ProN",serif; font-weight:900;
+    font-size:clamp(34px,8vw,66px); line-height:1.22; letter-spacing:.12em;
+    overflow-wrap:anywhere; text-shadow:0 2px 0 #8c481c,0 4px 0 #48200f,0 0 15px #ffd77b99;
+  }
+  .sign.vertical .sign-text { writing-mode:vertical-rl; max-height:380px; }
+  .ornament { position:absolute; color:#f4cf7d; font-size:20px; z-index:2; }
+  .ornament.tl { top:18px; left:22px; } .ornament.tr { top:18px; right:22px; }
+  .ornament.bl { bottom:18px; left:22px; } .ornament.br { bottom:18px; right:22px; }
+  .controls {
+    width:min(100%,590px); padding:20px; border:1px solid #5b4a35; border-radius:14px;
+    background:#171512eF; box-shadow:0 12px 32px #0006;
+  }
+  label { display:block; margin-bottom:9px; color:#e9d5ad; font-size:14px; }
+  input[type=text] {
+    width:100%; min-height:48px; padding:0 14px; border:1px solid #8d7047; border-radius:8px;
+    color:#fff2d2; background:#0e0d0b; font:inherit; font-size:16px; outline:none;
+  }
+  input[type=text]:focus { border-color:#edc36f; box-shadow:0 0 0 3px #edc36f22; }
+  .row { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-top:15px; }
+  .toggle { display:flex; align-items:center; gap:8px; margin:0; color:#cdbd9f; }
+  input[type=checkbox] { accent-color:#d9aa54; width:17px; height:17px; }
+  button {
+    border:1px solid #b88d4d; border-radius:8px; padding:10px 15px; color:#21170b;
+    background:linear-gradient(#f3d18a,#c18b3f); font:inherit; font-weight:700; cursor:pointer;
+  }
+  button:hover { filter:brightness(1.08); } button:active { transform:translateY(1px); }
+  .hint { margin:13px 0 0; color:#948773; font-size:12px; }
+  @media(max-width:480px) {
+    body { padding-inline:10px; gap:14px; }
+    .sign-wrap { padding:18px 16px; }
+    .sign { min-height:210px; padding:28px 20px; border-width:7px; }
+    .controls { padding:16px; }
+  }
+</style>
+</head>
+<body>
+<header class="heading">
+  <h1>居酒屋看板メーカー</h1>
+  <p>好きな言葉を、木の看板に。</p>
+</header>
+<main class="scene">
+  <div class="sign-wrap">
+    <section class="sign" id="sign" aria-label="看板プレビュー">
+      <span class="ornament tl">✦</span><span class="ornament tr">✦</span>
+      <div class="sign-text" id="preview" aria-live="polite">いらっしゃいませ</div>
+      <span class="ornament bl">✦</span><span class="ornament br">✦</span>
+    </section>
+  </div>
+</main>
+<section class="controls" aria-label="看板の設定">
+  <label for="message">看板に表示する文字</label>
+  <input id="message" type="text" maxlength="40" value="いらっしゃいませ" placeholder="好きな文字を入力">
+  <div class="row">
+    <label class="toggle"><input id="vertical" type="checkbox"> 縦書きにする</label>
+    <button id="reset" type="button">初期表示に戻す</button>
+  </div>
+  <p class="hint">入力すると看板にリアルタイムで反映されます（最大40文字）。</p>
+</section>
+<script>
+  const message = document.getElementById('message');
+  const preview = document.getElementById('preview');
+  const sign = document.getElementById('sign');
+  const vertical = document.getElementById('vertical');
+  function render() {
+    preview.textContent = message.value || ' ';
+    sign.classList.toggle('vertical', vertical.checked);
+  }
+  message.addEventListener('input', render);
+  vertical.addEventListener('change', render);
+  document.getElementById('reset').addEventListener('click', () => {
+    message.value = 'いらっしゃいませ';
+    vertical.checked = false;
+    render();
+  });
+</script>
+</body>
+</html>
