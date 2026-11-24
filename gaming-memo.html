@@ -36,8 +36,16 @@ label{color:#c5d2e5;font-size:.9rem}
 input[type=number]{width:82px;background:#0d1728;color:#fff;border:1px solid var(--line);border-radius:8px;padding:9px}
 .status{color:#ffcf70;font-size:.85rem;margin-left:auto}
 footer{text-align:center;color:#8292aa;font-size:.8rem;padding:12px}
-.board:fullscreen{width:100vw;height:100vh;min-height:100vh;border:0;border-radius:0;padding:4vw;box-shadow:none;display:flex;align-items:center;justify-content:center}
-.board:fullscreen .track{font-size:clamp(2.5rem,9vw,9rem)}
+.board:fullscreen{width:100vw;height:100vh;height:100dvh;min-height:100vh;min-height:100dvh;border:0;border-radius:0;padding:4vw;box-shadow:none;display:flex;align-items:center;justify-content:center}
+.board:fullscreen .track{font-size:clamp(2rem,8vw,9rem);max-width:100%}
+@media(orientation:portrait){
+ .board:fullscreen{padding:6vh 4vw}
+ .board:fullscreen .track{font-size:clamp(2rem,10vw,6rem);white-space:normal;overflow-wrap:anywhere;text-align:center}
+}
+@media(orientation:landscape){
+ .board:fullscreen{padding:4vw 6vh}
+ .board:fullscreen .track{font-size:clamp(2.5rem,8vw,9rem)}
+}
 @media(max-width:560px){body{padding:16px}.panel{padding:15px}.board{min-height:170px}.status,.mode-note{width:100%;margin-left:0}}
 </style>
 </head>
@@ -64,7 +72,7 @@ footer{text-align:center;color:#8292aa;font-size:.8rem;padding:12px}
 <button class="primary" id="save">リストを保存</button>
 <button id="clear">すべて消去</button>
 <label for="speed">流れる速さ</label>
-<input id="speed" type="number" min="5" max="40" value="12">
+<input id="speed" type="number" min="1" max="40" value="1">
 <label>秒 / 画面幅</label>
 <span class="status" id="status" role="status">未保存の変更があります</span>
 </div>
@@ -82,7 +90,7 @@ footer{text-align:center;color:#8292aa;font-size:.8rem;padding:12px}
  function setMessage(text){
   track.textContent=text;
   track.style.animation="none";void track.offsetWidth;
-  track.style.animationDuration=(Math.max(5,Math.min(40,Number(speed.value)||12)))+"s";
+  track.style.animationDuration=(Math.max(1,Math.min(40,Number(speed.value)||1)))+"s";
   track.style.animation=mode==="scroll"?"scroll "+track.style.animationDuration+" linear infinite":"";
   track.classList.toggle("paused",!playing);
   board.classList.toggle("blink-mode",mode==="blink");
@@ -107,10 +115,8 @@ footer{text-align:center;color:#8292aa;font-size:.8rem;padding:12px}
   try{
    if(!document.fullscreenElement){
     await board.requestFullscreen();
-    try{if(screen.orientation&&screen.orientation.lock)await screen.orientation.lock("landscape")}catch{}
    }else{
     await document.exitFullscreen();
-    try{if(screen.orientation&&screen.orientation.unlock)screen.orientation.unlock()}catch{}
    }
   }catch(error){updateStatus("全画面表示に対応していないブラウザーです")}
  });
@@ -126,7 +132,7 @@ footer{text-align:center;color:#8292aa;font-size:.8rem;padding:12px}
   area.value="";messages=[];localStorage.removeItem("gamingMemoMessages");last=-1;setMessage("文字列を登録してください");updateStatus("リストを消去しました");
  });
  area.addEventListener("input",()=>updateStatus("未保存の変更があります"));
- speed.addEventListener("change",()=>{if(mode==="scroll")track.style.animationDuration=(Math.max(5,Math.min(40,Number(speed.value)||12)))+"s"});
+ speed.addEventListener("change",()=>{if(mode==="scroll")track.style.animationDuration=(Math.max(1,Math.min(40,Number(speed.value)||1)))+"s"});
  if(messages.length)pick();
 })();
 </script>
