@@ -68,7 +68,7 @@ footer{text-align:center;color:#8292aa;font-size:.8rem;padding:12px}
 <label>秒 / 画面幅</label>
 <span class="status" id="status" role="status">未保存の変更があります</span>
 </div>
-<p class="hint">文字列はこのブラウザーに保存されます。新しいメッセージを選ぶたびに「流す」「点滅」のどちらかをランダムに選びます。</p>
+<p class="hint">文字列はこのブラウザーに保存されます。上から順番に表示し、「流す」「点滅」を交互に切り替えます。</p>
 </section>
 <footer>GAMING MEMO</footer>
 </main>
@@ -91,9 +91,9 @@ footer{text-align:center;color:#8292aa;font-size:.8rem;padding:12px}
  function pick(){
   const list=area.value.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
   if(!list.length){setMessage("文字列を登録してください");updateStatus("表示できる文字列がありません");return}
-  let index=Math.floor(Math.random()*list.length);
-  if(list.length>1&&index===last)index=(index+1+Math.floor(Math.random()*(list.length-1)))%list.length;
-  last=index;mode=Math.random()<.5?"scroll":"blink";
+  const index=(last+1)%list.length;
+  last=index;
+  mode=mode==="scroll"?"blink":"scroll";
   setMessage(list[index]);updateStatus((index+1)+" / "+list.length+" 件目を表示中");
  }
  document.getElementById("next").addEventListener("click",pick);
