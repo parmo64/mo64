@@ -16,9 +16,9 @@ h1{font-size:clamp(1.5rem,4vw,2.2rem);margin:0;letter-spacing:.08em}
 .panel{background:rgba(24,38,48,.92);border:1px solid var(--line);border-radius:16px;padding:20px;margin:16px 0;box-shadow:0 12px 35px #0003}
 .board{overflow:hidden;position:relative;min-height:180px;display:flex;align-items:center;background:#080e0d;border:10px solid #26343a;border-radius:12px;box-shadow:inset 0 0 28px #000,0 5px 0 #0a1115;padding:24px 0}
 .board:before,.board:after{content:"";position:absolute;inset:0;pointer-events:none;z-index:2}
-.board:before{background:repeating-linear-gradient(0deg,transparent 0 3px,#0003 4px)}
+.board:before{background:repeating-linear-gradient(0deg,transparent 0 3px,#0002 4px)}
 .board:after{background:linear-gradient(90deg,#080e0d 0%,transparent 8%,transparent 92%,#080e0d 100%)}
-.track{white-space:nowrap;display:inline-block;padding-left:100%;font-family:"Courier New",monospace;font-size:clamp(2rem,7vw,4.2rem);font-weight:800;letter-spacing:.12em;color:var(--green);text-shadow:0 0 8px #9dff55,0 0 22px #70d52b;animation:scroll 12s linear infinite}
+.track{white-space:nowrap;display:inline-block;padding-left:100%;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;font-size:clamp(2rem,7vw,4.2rem);font-weight:800;letter-spacing:.08em;color:var(--green);text-shadow:none;animation:scroll 12s linear infinite}
 .track.paused{animation-play-state:paused}
 @keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-100%)}}
 .board-label{position:absolute;top:10px;left:14px;color:#71877d;font:700 .65rem "Courier New",monospace;letter-spacing:.16em;z-index:3}
@@ -36,6 +36,11 @@ label{color:#c5d5d9;font-size:.9rem}
 input[type=number]{width:82px;background:#0e171d;color:#fff;border:1px solid var(--line);border-radius:8px;padding:9px}
 .status{color:var(--amber);font-size:.85rem;margin-left:auto}
 footer{text-align:center;color:#71858d;font-size:.8rem;padding:12px}
+:fullscreen{background:#101820}
+:fullscreen body{min-height:100vh;padding:clamp(12px,3vw,32px);display:flex;align-items:center}
+:fullscreen main{width:100%;max-width:none}
+:fullscreen .board{min-height:45vh}
+:fullscreen .track{font-size:clamp(2.5rem,8vw,6rem)}
 @media(max-width:560px){body{padding:16px}.panel{padding:15px}.board{min-height:150px}.status{width:100%;margin-left:0}}
 </style>
 </head>
@@ -48,11 +53,15 @@ footer{text-align:center;color:#71858d;font-size:.8rem;padding:12px}
 <button class="primary" id="next">次のメッセージ ▶</button>
 <button id="toggle">一時停止</button>
 <button id="shuffle">ランダム再生</button>
+<button id="fullscreen">⛶ 横向き・全画面</button>
 </div>
 </section>
 <section class="panel">
 <div class="section-title"><h2>表示する文字列</h2><small>1行につき1つ登録</small></div>
-<textarea id="items" spellcheck="false" aria-label="表示する文字列" placeholder="例：\n今日の目標：ランクアップ\n忘れずに装備を変更\nイベント開始は20時"></textarea>
+<textarea id="items" spellcheck="false" aria-label="表示する文字列" placeholder="例：
+今日の目標：ランクアップ
+忘れずに装備を変更
+イベント開始は20時"></textarea>
 <div class="row">
 <button class="primary" id="save">リストを保存</button>
 <button id="clear">すべて消去</button>
@@ -93,6 +102,20 @@ footer{text-align:center;color:#71858d;font-size:.8rem;padding:12px}
  });
  document.getElementById('shuffle').addEventListener('click',()=>{
   pick();playing=true;track.classList.remove('paused');document.getElementById('toggle').textContent='一時停止';
+ });
+ document.getElementById('fullscreen').addEventListener('click',async()=>{
+  try{
+   if(!document.fullscreenElement){
+    await document.documentElement.requestFullscreen();
+    try{if(screen.orientation&&screen.orientation.lock)await screen.orientation.lock('landscape');}catch{}
+   }else{
+    await document.exitFullscreen();
+    try{if(screen.orientation&&screen.orientation.unlock)screen.orientation.unlock();}catch{}
+   }
+  }catch(error){updateStatus('全画面表示に対応していないブラウザーです');}
+ });
+ document.addEventListener('fullscreenchange',()=>{
+  document.getElementById('fullscreen').textContent=document.fullscreenElement?'全画面を終了':'⛶ 横向き・全画面';
  });
  document.getElementById('save').addEventListener('click',()=>{
   messages=area.value.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
