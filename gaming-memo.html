@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#101820">
+<title>Gaming Memo - 電光掲示板</title>
+<style>
+:root{color-scheme:dark;--bg:#101820;--panel:#182630;--line:#304550;--green:#b8ff70;--amber:#ffc857;--muted:#9db0b8}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(ellipse at top,#203541 0,#101820 58%);color:#edf5f5;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;padding:24px}
+main{max-width:900px;margin:0 auto}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}
+h1{font-size:clamp(1.5rem,4vw,2.2rem);margin:0;letter-spacing:.08em}
+.kicker{color:var(--green);font-size:.75rem;letter-spacing:.2em}
+.panel{background:rgba(24,38,48,.92);border:1px solid var(--line);border-radius:16px;padding:20px;margin:16px 0;box-shadow:0 12px 35px #0003}
+.board{overflow:hidden;position:relative;min-height:180px;display:flex;align-items:center;background:#080e0d;border:10px solid #26343a;border-radius:12px;box-shadow:inset 0 0 28px #000,0 5px 0 #0a1115;padding:24px 0}
+.board:before,.board:after{content:"";position:absolute;inset:0;pointer-events:none;z-index:2}
+.board:before{background:repeating-linear-gradient(0deg,transparent 0 3px,#0003 4px)}
+.board:after{background:linear-gradient(90deg,#080e0d 0%,transparent 8%,transparent 92%,#080e0d 100%)}
+.track{white-space:nowrap;display:inline-block;padding-left:100%;font-family:"Courier New",monospace;font-size:clamp(2rem,7vw,4.2rem);font-weight:800;letter-spacing:.12em;color:var(--green);text-shadow:0 0 8px #9dff55,0 0 22px #70d52b;animation:scroll 12s linear infinite}
+.track.paused{animation-play-state:paused}
+@keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-100%)}}
+.board-label{position:absolute;top:10px;left:14px;color:#71877d;font:700 .65rem "Courier New",monospace;letter-spacing:.16em;z-index:3}
+.controls{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+button{border:1px solid #49616b;background:#243943;color:#f4fbfb;border-radius:9px;padding:11px 16px;font:600 .95rem inherit;cursor:pointer}
+button:hover{filter:brightness(1.18)}
+button.primary{background:var(--green);border-color:var(--green);color:#14200d}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--amber);outline-offset:3px}
+.section-title{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 12px}
+h2{font-size:1.1rem;margin:0}
+small,.hint{color:var(--muted)}
+textarea{width:100%;min-height:180px;resize:vertical;background:#0e171d;color:#eff8f8;border:1px solid var(--line);border-radius:10px;padding:13px;font: .98rem/1.8 system-ui,sans-serif}
+.row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px}
+label{color:#c5d5d9;font-size:.9rem}
+input[type=number]{width:82px;background:#0e171d;color:#fff;border:1px solid var(--line);border-radius:8px;padding:9px}
+.status{color:var(--amber);font-size:.85rem;margin-left:auto}
+footer{text-align:center;color:#71858d;font-size:.8rem;padding:12px}
+@media(max-width:560px){body{padding:16px}.panel{padding:15px}.board{min-height:150px}.status{width:100%;margin-left:0}}
+</style>
+</head>
+<body>
+<main>
+<header><div><div class="kicker">RANDOM MESSAGE DISPLAY</div><h1>GAMING MEMO</h1></div><div aria-hidden="true">▰ ▰ ▰</div></header>
+<section class="panel" aria-label="電光掲示板">
+<div class="board"><div class="board-label">NOW DISPLAYING</div><div id="track" class="track">メッセージを登録してください</div></div>
+<div class="controls">
+<button class="primary" id="next">次のメッセージ ▶</button>
+<button id="toggle">一時停止</button>
+<button id="shuffle">ランダム再生</button>
+</div>
+</section>
+<section class="panel">
+<div class="section-title"><h2>表示する文字列</h2><small>1行につき1つ登録</small></div>
+<textarea id="items" spellcheck="false" aria-label="表示する文字列" placeholder="例：\n今日の目標：ランクアップ\n忘れずに装備を変更\nイベント開始は20時"></textarea>
+<div class="row">
+<button class="primary" id="save">リストを保存</button>
+<button id="clear">すべて消去</button>
+<label for="speed">流れる速さ</label>
+<input id="speed" type="number" min="5" max="40" value="12">
+<label>秒 / 画面幅</label>
+<span class="status" id="status" role="status">未保存の変更があります</span>
+</div>
+<p class="hint">入力した文字列はこのブラウザーに保存されます。保存後、「次のメッセージ」または「ランダム再生」で表示できます。</p>
+</section>
+<footer>GAMING MEMO · DIGITAL SIGNAGE STYLE</footer>
+</main>
+<script>
+(() => {
+ const area=document.getElementById('items'),track=document.getElementById('track'),status=document.getElementById('status'),speed=document.getElementById('speed');
+ let messages=[],last=-1,playing=true;
+ try{messages=JSON.parse(localStorage.getItem('gamingMemoMessages')||'[]');}catch{}
+ area.value=messages.join('\n');
+ function updateStatus(text){status.textContent=text;}
+ function setMessage(text){
+  track.textContent=text;
+  track.style.animation='none';
+  void track.offsetWidth;
+  track.style.animationDuration=(Math.max(5,Math.min(40,Number(speed.value)||12)))+'s';
+  track.style.animation='scroll '+track.style.animationDuration+' linear infinite';
+  track.classList.toggle('paused',!playing);
+ }
+ function pick(){
+  const list=area.value.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+  if(!list.length){setMessage('文字列を登録してください');updateStatus('表示できる文字列がありません');return;}
+  let index=Math.floor(Math.random()*list.length);
+  if(list.length>1&&index===last)index=(index+1+Math.floor(Math.random()*(list.length-1)))%list.length;
+  last=index;setMessage(list[index]);updateStatus((index+1)+' / '+list.length+' 件目を表示中');
+ }
+ document.getElementById('next').addEventListener('click',pick);
+ document.getElementById('toggle').addEventListener('click',e=>{
+  playing=!playing;track.classList.toggle('paused',!playing);e.currentTarget.textContent=playing?'一時停止':'再生';
+ });
+ document.getElementById('shuffle').addEventListener('click',()=>{
+  pick();playing=true;track.classList.remove('paused');document.getElementById('toggle').textContent='一時停止';
+ });
+ document.getElementById('save').addEventListener('click',()=>{
+  messages=area.value.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+  localStorage.setItem('gamingMemoMessages',JSON.stringify(messages));updateStatus(messages.length+' 件を保存しました');
+  if(messages.length)pick();else setMessage('文字列を登録してください');
+ });
+ document.getElementById('clear').addEventListener('click',()=>{
+  area.value='';messages=[];localStorage.removeItem('gamingMemoMessages');last=-1;setMessage('文字列を登録してください');updateStatus('リストを消去しました');
+ });
+ area.addEventListener('input',()=>updateStatus('未保存の変更があります'));
+ speed.addEventListener('change',()=>{track.style.animationDuration=(Math.max(5,Math.min(40,Number(speed.value)||12)))+'s';});
+ if(messages.length)pick();
+})();
+</script>
+</body>
+</html>
