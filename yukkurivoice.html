@@ -136,8 +136,8 @@
     try {
       status.textContent = "音声ライブラリを読み込んでいます…";
       const [{ load }, { loadAqKanji2Koe }] = await Promise.all([
-        import("https://esm.sh/yukumo.js"),
-        import("https://esm.sh/yukumo.js/lang/kanji2koe")
+        import("https://cdn.jsdelivr.net/npm/yukumo.js/+esm"),
+        import("https://cdn.jsdelivr.net/npm/yukumo.js/lang/kanji2koe/+esm")
       ]);
 
     const input = document.getElementById("textInput");
@@ -260,7 +260,7 @@
       } catch (error) {
         console.error(error);
         if (token === runToken) {
-          status.textContent = "読み込み・再生に失敗しました。通信環境を確認して、もう一度お試しください。";
+          status.textContent = "読み込み・再生エラー: " + (error?.message || String(error));
         }
       } finally {
         if (token === runToken) {
