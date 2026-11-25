@@ -2,6 +2,10 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const $ = (id) => document.getElementById(id);
 const STORAGE_KEY = "mo64-memo-supabase-config";
+const DEFAULT_CONFIG = {
+  url: "https://cchevqlgwhlyxdnubsev.supabase.co",
+  key: "sb_publishable_FRHntwiqVsrdfSjF5byHkA_wYJTdww7"
+};
 let supabase = null;
 let currentUser = null;
 let notes = [];
@@ -14,8 +18,8 @@ const setStatus = (text, online = false) => {
   $("syncState").classList.toggle("online", online);
 };
 const config = () => {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "null"); }
-  catch { return null; }
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "null") || DEFAULT_CONFIG; }
+  catch { return DEFAULT_CONFIG; }
 };
 const show = (id, visible) => $(id).classList.toggle("hidden", !visible);
 const escapeText = (value) => String(value || "");
