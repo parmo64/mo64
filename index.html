@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f7f5">
+  <title>mo64 memo</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="./" aria-label="mo64 memo ホーム"><span class="brand-mark">m</span><span>memo</span></a>
+      <div class="top-actions">
+        <span id="syncState" class="sync-state">未接続</span>
+        <button id="settingsButton" class="icon-button" type="button" aria-label="接続設定" title="接続設定">⚙</button>
+        <button id="signOutButton" class="text-button hidden" type="button">ログアウト</button>
+      </div>
+    </header>
+
+    <section id="authPanel" class="auth-panel hidden">
+      <div class="auth-card">
+        <p class="eyebrow">YOUR PRIVATE SPACE</p>
+        <h1>メモを、どこからでも。</h1>
+        <p class="muted">アカウントでログインすると、メモをオンラインに保存できます。</p>
+        <form id="authForm">
+          <label for="emailInput">メールアドレス</label>
+          <input id="emailInput" type="email" autocomplete="email" required placeholder="you@example.com">
+          <label for="passwordInput">パスワード</label>
+          <input id="passwordInput" type="password" autocomplete="current-password" minlength="6" required placeholder="6文字以上">
+          <button id="authSubmit" class="primary-button" type="submit">ログイン</button>
+        </form>
+        <button id="authModeButton" class="link-button" type="button">アカウントを新規作成</button>
+        <p id="authMessage" class="message" role="status"></p>
+      </div>
+    </section>
+
+    <section id="memoApp" class="workspace hidden">
+      <aside class="sidebar">
+        <div class="sidebar-heading">
+          <div><p class="eyebrow">YOUR NOTES</p><h2>すべてのメモ</h2></div>
+          <button id="newNoteButton" class="new-button" type="button" aria-label="新しいメモ">＋</button>
+        </div>
+        <label class="search-box"><span>⌕</span><input id="searchInput" type="search" placeholder="メモを検索"></label>
+        <div id="noteList" class="note-list"></div>
+        <p id="emptyList" class="empty-hint">まだメモがありません。<br>＋から作成できます。</p>
+        <div class="sidebar-footer">個人用オンラインメモ</div>
+      </aside>
+
+      <section class="editor">
+        <div id="welcomeView" class="welcome-view">
+          <div class="welcome-icon">✎</div>
+          <h1>思いついたことを、ここに。</h1>
+          <p>メモを選択するか、新しいメモを作成してください。</p>
+          <button id="welcomeNewButton" class="primary-button" type="button">新しいメモを作成</button>
+        </div>
+        <div id="editorView" class="editor-view hidden">
+          <div class="editor-toolbar">
+            <span id="updatedLabel" class="muted">未保存</span>
+            <button id="deleteNoteButton" class="delete-button" type="button">削除</button>
+          </div>
+          <input id="titleInput" class="title-input" type="text" maxlength="120" placeholder="タイトル">
+          <textarea id="contentInput" class="content-input" placeholder="ここにメモを書く…"></textarea>
+          <div class="editor-footer"><span>変更は自動で保存されます</span><span id="charCount">0文字</span></div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <dialog id="settingsDialog" class="settings-dialog">
+    <form id="settingsForm" method="dialog">
+      <div class="dialog-heading"><div><p class="eyebrow">CONNECTION</p><h2>Supabase接続設定</h2></div><button id="closeSettingsButton" class="icon-button" type="button" aria-label="閉じる">×</button></div>
+      <p class="muted">SupabaseプロジェクトのURLとPublishable keyを入力してください。</p>
+      <label for="projectUrlInput">Project URL</label>
+      <input id="projectUrlInput" type="url" placeholder="https://xxxx.supabase.co" required>
+      <label for="publishableKeyInput">Publishable key</label>
+      <input id="publishableKeyInput" type="password" placeholder="sb_publishable_..." required autocomplete="off">
+      <p class="small-note">Publishable key（旧anon key）はブラウザで使えます。service_role / secret keyは絶対に入力しないでください。</p>
+      <button class="primary-button" type="submit">接続して保存</button>
+      <p id="settingsMessage" class="message" role="status"></p>
+    </form>
+  </dialog>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
