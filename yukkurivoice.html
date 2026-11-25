@@ -118,7 +118,7 @@
         <button id="stopButton" disabled>■ 停止</button>
         <button id="clearButton">クリア</button>
       </div>
-      <p class="status" id="status" role="status" aria-live="polite">準備完了</p>
+      <p class="status" id="status" role="status" aria-live="polite">スクリプトを起動しています…</p>
 
       <div class="stage">
         <div class="stage-head">
@@ -132,8 +132,12 @@
   </main>
 
   <script type="module">
-    import { load } from "https://esm.sh/yukumo.js";
-    import { loadAqKanji2Koe } from "https://esm.sh/yukumo.js/lang/kanji2koe";
+    try {
+      status.textContent = "音声ライブラリを読み込んでいます…";
+      const [{ load }, { loadAqKanji2Koe }] = await Promise.all([
+        import("https://esm.sh/yukumo.js"),
+        import("https://esm.sh/yukumo.js/lang/kanji2koe")
+      ]);
 
     const input = document.getElementById("textInput");
     const playButton = document.getElementById("playButton");
@@ -184,7 +188,7 @@
         enginePromise = (async () => {
           status.textContent = "音声エンジンを読み込み中…";
           const [voice, kanaConverter] = await Promise.all([
-            load("f2"),
+            load("f2", { memorySize: 128 * 1024 * 1024 }),
             loadAqKanji2Koe()
           ]);
           engine = voice;
@@ -293,12 +297,17 @@
       status.textContent = "クリアしました。";
     });
     updateLineCount();
+    status.textContent = "準備完了。文章を入力して読み上げ開始を押してください。";
 
     window.addEventListener("beforeunload", () => {
       clearAudio();
       engine?.destroy();
       converter?.destroy();
     });
+    } catch (error) {
+      console.error("ゆっくり読み上げの初期化に失敗:", error);
+      status.textContent = "初期化エラー: " + (error?.message || String(error)) + "（ページを再読み込みしてください）";
+    }
   </script>
 </body>
 </html>
